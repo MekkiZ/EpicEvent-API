@@ -59,3 +59,27 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+
+class LoginView(APIView):
+    authentication_classes = (TokenAuthentication, )
+
+    def post(self, request):
+        username = request.data['name']
+        password = request.data['password']
+
+        user = User.objects.filter(username=username).first()
+        if user is None:
+            raise AuthenticationFailed('User not found')
+        if not user.check_password(password):
+            raise AuthenticationFailed('Incorrect Password')
+
+        payload = {
+            'id' : user.id,
+            'exp' : datetime.datetime.utcnow()+ datetime.timedelta(minutes=60),
+            'iat': datetime.datetime.utcnow()
+        }
+        token = jwt.encode(payload, 'secret', algorithm='HS256').decode('utf-8')
+        return Response({
+            'message': 'success'
+        })
