@@ -1,9 +1,11 @@
 from django.contrib.auth.models import User, Group
+from .models import Client, Event, EventStatus, Contrat
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
+from rest_framework.authtoken.models import Token
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -50,8 +52,60 @@ class RegisterSerializer(serializers.ModelSerializer):
             last_name=validated_data['last_name']
         )
         user.set_password(validated_data['password'])
+
+        # Token.objects.get_or_create(user=user)
+
         user.save()
         return user
 
 
+class ClientDetailSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Client
+        fields = ['id',
+                  'first_name',
+                  'last_name',
+                  'email',
+                  'phone',
+                  'mobile',
+                  'company_name',
+                  'date_created',
+                  'date_update',
+                  'sales_contact']
 
+
+class ContratDetailSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Contrat
+        fields = ['id',
+                  'sales_contact',
+                  'client_id',
+                  'date_created',
+                  'date_update',
+                  'status',
+                  'amount',
+                  'payment_due'
+                  ]
+
+
+class EventDetailSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Event
+        fields = ['id',
+                  'client_id',
+                  'date_created',
+                  'date_update',
+                  'support_contact',
+                  'event_status',
+                  'attendees',
+                  'event_date',
+                  'note'
+                  ]
+
+
+class EventStatusDetailSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = EventStatus
+        fields = ['id',
+                  'event_status',
+                  ]
