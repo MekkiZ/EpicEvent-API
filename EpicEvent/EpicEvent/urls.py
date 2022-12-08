@@ -20,18 +20,16 @@ from rest_framework import routers
 from api import views
 
 router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
-router.register(r'groups', views.GroupViewSet)
+router.register(r'users', views.UserViewSet, basename='users')
+router.register(r'client', views.ClientFilterViewSet, basename='client')
+router.register(r'contrat', views.ContratViewSet, basename='contrat')
+router.register(r'event', views.EventViewSet, basename='event')
+
 
 urlpatterns = [
     path('', include(router.urls)),
     path('', include('rest_framework.urls')),
-    path('api-auth/', include('rest_framework.urls')),
     path('admin/', admin.site.urls),
-    path('register/', views.RegisterUserAPIView.as_view()),
-    path('client/', views.ClientViewSet.as_view()),
-    path('contrat/', views.ContratViewSet.as_view()),
-    path('event/', views.EventViewSet.as_view()),
-    path('event_stat/', views.EventStatusViewSet.as_view()),
+
 
 ]

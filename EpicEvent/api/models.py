@@ -27,32 +27,44 @@ class Client(models.Model):
     date_update = models.DateTimeField(null=True)
     sales_contact = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return f'{self.id} : {self.last_name} {self.first_name}'
+
 
 class Contrat(models.Model):
+    STATUS_CHOICES = (
+        (True, 'Signer'),
+        (False, 'Pas signer')
+    )
+
     sales_contact = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    client_id = models.ForeignKey(Client, on_delete=models.CASCADE)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
     date_created = models.DateTimeField(null=False)
     date_update = models.DateTimeField(null=True)
-    status = models.BooleanField()
-    amount = models.FloatField()
-    payment_due = models.DateTimeField(null=False)
+    status = models.BooleanField(choices=STATUS_CHOICES)
+    amount = models.FloatField(null=True)
+    payment_due = models.DateTimeField(null=True)
 
 
 class EventStatus(models.Model):
     STATUS_CHOICES = (
-        ('Begin', 'BEGIN'),
-        ('Progress', 'PROGRESS'),
-        ('End', 'END')
+        ('Begin', True),
+        ('End', False)
     )
-    event_status = models.CharField(max_length=255, choices=STATUS_CHOICES)
+    event_statu = models.CharField(max_length=255, choices=STATUS_CHOICES)
+
+    def __str__(self):
+        return f'{self.event_statu}'
 
 
 class Event(models.Model):
-    client_id = models.ForeignKey(Client, on_delete=models.CASCADE)
-    date_created = models.DateTimeField(null=False)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    date_created = models.DateTimeField()
     date_update = models.DateTimeField()
     support_contact = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    event_status = models.ForeignKey(EventStatus, on_delete=models.CASCADE)
+    event_statu = models.ForeignKey(EventStatus, related_name='status', on_delete=models.CASCADE)
     attendees = models.IntegerField()
-    event_date = models.DateTimeField(null=False)
+    event_date = models.DateTimeField()
     note = models.TextField()
+
+

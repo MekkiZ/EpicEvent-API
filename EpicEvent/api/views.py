@@ -1,19 +1,20 @@
-from django.shortcuts import render
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User, Group
 from api.serializers import UserSerializer, GroupSerializer, EventStatusDetailSerializers, \
     EventDetailSerializers, ContratDetailSerializers, ClientDetailSerializers
-from rest_framework.decorators import action
-from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.permissions import AllowAny
-from rest_framework.views import APIView
+from django.db.models import Q
+from rest_framework.exceptions import NotFound
+from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
-from .serializers import UserSerializer, RegisterSerializer
+from .serializers import UserSerializer
 from rest_framework import viewsets, status
-from rest_framework import permissions, generics
-import jwt, datetime
+from rest_framework import permissions
 from .models import Client, Contrat, Event, EventStatus
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
+from django_filters import rest_framework as filters
+from api.permissions import IsAdminAuthenticated, ReadOnly
+from .function_native import create_event
 
 
 class GroupViewSet(viewsets.ModelViewSet):
@@ -25,39 +26,55 @@ class GroupViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
-# Class based view to Get User Details using Token Authentication
-class UserDetailAPI(APIView):
-    """
-    Function get details to all users in API
-    """
-    permission_classes = (AllowAny,)
-
-    def get(self, request, *args, **kwargs):
-        user = User.objects.get(id=request.user.id)
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
-
-
-# Class based view to register user
-class RegisterUserAPIView(generics.CreateAPIView):
-    """
-    This function have to purpose to display the register part
-    """
-
-    serializer_class = RegisterSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-
 class UserViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
     """
-    queryset = User.objects.all().order_by('-date_joined')
+    # queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAdminAuthenticated]
+
+    def get_queryset(self):
+        hr = User.objects.get(id=self.request.user.id)
+        # id_group_from_user = hr.groups.all().values_list('id', flat=True)[0]
+        groups = hr.groups.all().values_list('name', flat=True)[0]
+        group = Group.objects.get(name='team_gestion').name
+
+        if groups == group:
+            permission_classes = [IsAuthenticated | ReadOnly]
+            return User.objects.all().order_by('-date_joined')
+        else:
+            raise NotFound
+
+    def create(self, *args, **kwargs):
+        hr = User.objects.get(id=self.request.user.id)
+        # id_group_from_user = hr.groups.all().values_list('id', flat=True)[0]
+        groups = hr.groups.all().values_list('name', flat=True)[0]
+        group = Group.objects.get(name='team_gestion').name
+
+        if groups == group:
+            user = User.objects.create(
+                username=self.request.data['username'],
+                email=self.request.data['email'],
+                first_name=self.request.data['first_name'],
+                last_name=self.request.data['last_name'],
+                password=make_password(self.request.data['password']),
+
+            )
+
+            user.set_password(self.request.data['password'])
+
+            # Token.objects.get_or_create(user=user)
+            user_group = Group.objects.get(id=self.request.data['groups'])
+            user.groups.add(user_group)
+            user_group.save()
+            user.save()
+            return Response(UserSerializer(user).data)
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
-class ClientViewSet(generics.ListAPIView):
+class ClientFilterViewSet(viewsets.ModelViewSet):
     """
         Function get details to all users in API
         """
@@ -67,63 +84,249 @@ class ClientViewSet(generics.ListAPIView):
     filterset_fields = ['last_name', 'email']
 
     def get_queryset(self):
-        queryset = Client.objects.all()
-        return queryset
+        hr = User.objects.get(id=self.request.user.id)
+        # id_group_from_user = hr.groups.all().values_list('id', flat=True)[0]
+        groups = hr.groups.all().values_list('name', flat=True)[0]
+        group = Group.objects.get(name='team_sales').name
+        group_2 = Group.objects.get(name='team_gestion').name
+        if groups == group:
+            return Client.objects.filter(sales_contact=hr.id)
+        elif groups == group_2:
+            return Client.objects.all()
+        else:
+            raise NotFound
 
-    def post(self, request, *args, **kwargs):
-        if self.kwargs['last_name'] and self.kwargs['email']:
-            client = Client()
-            client.first_name = request.data['first_name']
-            client.last_name = request.data['last_name']
-            client.email = request.data['email']
-            client.phone = request.data['phone']
-            client.mobile = request.data['mobile']
-            client.company_name = request.data['company_name']
-            client.date_created = request.data['date_created']
-            client.date_update = request.data['date_update']
-            client.sales_contact = get_object_or_404(User, id=request.data['sales_contact'])
-            data = {'first_name': client.first_name,
-                    'last_name': client.last_name,
-                    'email': client.email,
-                    'phone': client.phone,
-                    'mobile': client.mobile,
-                    'company_name': client.company_name,
-                    'date_created': client.date_created,
-                    'date_update': client.date_update,
-                    'sales_contact': client.sales_contact.id
-                    }
+    def create(self, *args, **kwargs):
+        hr = User.objects.get(id=self.request.user.id)
+        # id_group_from_user = hr.groups.all().values_list('id', flat=True)[0]
+        groups = hr.groups.all().values_list('name', flat=True)[0]
+        group = Group.objects.get(name='team_sales').name
+        group_2 = Group.objects.get(name='team_gestion').name
+
+        if groups == group or group_2:
+            client = Client.objects.create(
+                first_name=self.request.data['first_name'],
+                last_name=self.request.data['last_name'],
+                email=self.request.data['email'],
+                phone=self.request.data['phone'],
+                mobile=(self.request.data['mobile']),
+                company_name=self.request.data['company_name'],
+                date_created=self.request.data['date_created'],
+                date_update=self.request.data['date_update'],
+                sales_contact=get_object_or_404(User, id=self.request.data['sales_contact']),
+
+            )
             client.save()
-            return Response(data, status=status.HTTP_201_CREATED)
+            return Response(ClientDetailSerializers(client).data)
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    def update(self, request, *args, **kwargs):
+        hr = User.objects.get(id=self.request.user.id)
+        groups = hr.groups.all().values_list('name', flat=True)[0]
+        group = Group.objects.get(name='team_sales').name
+        group_2 = Group.objects.get(name='team_gestion').name
+        client = Client.objects.get(id=self.kwargs['pk'])
+        sale_cont = client.sales_contact.id
+        print(sale_cont)
+
+        if request.method == 'PUT':
+            if (groups == group_2) or (sale_cont.id == hr.id and groups == group):
+                client.last_name = request.data['last_name']
+                client.email = request.data['email']
+                client.phone = request.data['phone']
+                client.mobile = request.data['mobile']
+                client.company_name = request.data['company_name']
+                client.date_created = request.data['date_created']
+                client.date_update = request.data['date_update']
+                client.first_name = request.data['first_name']
+                client.save()
+                return Response(ClientDetailSerializers(client).data,
+                                status=status.HTTP_200_OK)
+            else:
+                return Response(status.HTTP_401_UNAUTHORIZED)
+        else:
+            Response(status.HTTP_400_BAD_REQUEST)
 
 
-class ContratViewSet(APIView):
+class ContratFilter(filters.FilterSet):
+    email = filters.CharFilter(field_name='client__email', lookup_expr='exact')
+    client = filters.CharFilter(field_name='client__last_name', lookup_expr='exact')
+    date_created = filters.DateFilter(field_name='date_created', lookup_expr='icontains')
+    amount = filters.NumberFilter(field_name='amount', lookup_expr='exact')
+
+    class Meta:
+        model: Contrat
+
+
+class ContratViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
     """
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ContratDetailSerializers
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ContratFilter
 
-    def get(self, request, *args, **kwargs):
-        contrat = Contrat.objects.all()
-        serializer = ContratDetailSerializers(contrat, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        hr = User.objects.get(id=self.request.user.id)
+        # id_group_from_user = hr.groups.all().values_list('id', flat=True)[0]
+        groups = hr.groups.all().values_list('name', flat=True)[0]
+        group = Group.objects.get(name='team_sales').name
+        group_2 = Group.objects.get(name='team_gestion').name
+        if groups == group:
+            return Contrat.objects.filter(sales_contact=hr.id)
+        elif groups == group_2:
+            return Contrat.objects.all()
+        else:
+            raise NotFound
+
+    def create(self, *args, **kwargs):
+        hr = User.objects.get(id=self.request.user.id)
+        # id_group_from_user = hr.groups.all().values_list('id', flat=True)[0]
+        groups = hr.groups.all().values_list('name', flat=True)[0]
+        group = Group.objects.get(name='team_sales').name
+        group_2 = Group.objects.get(name='team_gestion').name
+
+        if groups == group or group_2:
+            contrat = Contrat.objects.create(
+                payment_due=self.request.data['payment_due'],
+                amount=(self.request.data['amount']),
+                status=self.request.data['status'],
+                date_created=self.request.data['date_created'],
+                date_update=self.request.data['date_update'],
+                sales_contact=get_object_or_404(User, id=self.request.data['sales_contact']),
+                client=get_object_or_404(Client, id=self.request.data['client']),
+
+            )
+            contrat.save()
+            return Response(ContratDetailSerializers(contrat).data)
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    def update(self, request, *args, **kwargs):
+        hr = User.objects.get(id=self.request.user.id)
+        groups = hr.groups.all().values_list('name', flat=True)[0]
+        group = Group.objects.get(name='team_sales').name
+        group_2 = Group.objects.get(name='team_gestion').name
+        contrat = Contrat.objects.get(id=self.kwargs['pk'])
+        sale_cont = Contrat.objects.get(id=contrat.sales_contact.id)
+
+        if request.method == 'PUT':
+            if (groups == group_2 or group) or \
+                    (sale_cont.id == hr.id and groups == group):
+                contrat.sales_contact = get_object_or_404(User, id=request.data['sales_contact'])
+                contrat.client = get_object_or_404(Client, id=request.data['client'])
+                contrat.amount = request.data['amount']
+                contrat.status = request.data['status']
+                contrat.date_created = request.data['date_created']
+                contrat.date_update = request.data['date_update']
+                contrat.payment_due = request.data['payment_due']
+                contrat.save()
+                return Response(ContratDetailSerializers(contrat).data,
+                                status=status.HTTP_200_OK)
+            else:
+                return Response(status.HTTP_401_UNAUTHORIZED)
+        else:
+            Response(status.HTTP_400_BAD_REQUEST)
 
 
-class EventViewSet(APIView):
+class EventFilter(filters.FilterSet):
+    client = filters.CharFilter(field_name='client__last_name', lookup_expr='exact')
+    email = filters.CharFilter(field_name='client__email', lookup_expr='exact')
+    event_date = filters.DateFilter(field_name='event_date', lookup_expr='icontains')
+
+    class Meta:
+        model: Event
+
+
+class EventViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
     """
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = EventDetailSerializers
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = EventFilter
 
-    def get(self, request, *args, **kwargs):
-        event = Event.objects.all()
-        serializer = EventDetailSerializers(event, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        hr = User.objects.get(id=self.request.user.id)
+        # id_group_from_user = hr.groups.all().values_list('id', flat=True)[0]
+        groups = hr.groups.all().values_list('name', flat=True)[0]
+        group = Group.objects.get(name='team_sales').name
+        group_2 = Group.objects.get(name='team_gestion').name
+        group_3 = Group.objects.get(name='team_support').name
+        if groups == group_3:
+            return Event.objects.filter(support_contact=hr.id)
+        elif groups == group:
+            client = Client.objects.filter(sales_contact=hr.id)
+            event = Event.objects.filter(client__in=client)
+            return event
+            # return  Event.objects.all()
+        elif groups == group_2:
+            return Event.objects.all()
+        else:
+            raise NotFound
+
+    def create(self, *args, **kwargs):
+        list_sign = []
+        hr = User.objects.get(id=self.request.user.id)
+        # id_group_from_user = hr.groups.all().values_list('id', flat=True)[0]
+        groups = hr.groups.all().values_list('name', flat=True)[0]
+        group = Group.objects.get(name='team_sales').name
+        group_2 = Group.objects.get(name='team_gestion').name
+        event = Event.objects.all().values_list('client', flat=True)
+        print(event)
+        contrat = Contrat.objects.filter(Q(client__in=event) & Q(status=False)).values()
+
+        for i in contrat:
+            list_sign.append(i['client_id'])
+        event_id = get_object_or_404(Client, id=self.request.data['client'])
+        if event_id.id in list_sign:
+            return Response(data={"You can't create event because this client have not sign the contract"},
+                            status=status.HTTP_406_NOT_ACCEPTABLE)
+        elif groups == group or group_2:
+            event = create_event(self.request, Event, get_object_or_404, EventStatus, Client, User)
+            return Response(EventDetailSerializers(event).data)
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    def update(self, request, pk, *args, **kwargs):
+        hr = User.objects.get(id=request.user.id)
+        groups = hr.groups.all().values_list('name', flat=True)[0]
+        group = Group.objects.get(name='team_support').name
+        group_2 = Group.objects.get(name='team_gestion').name
+        event = Event.objects.get(id=pk)
+        sale_co = Client.objects.get(id=event.client.id)
+        vendeur = sale_co.sales_contact.id
+        username_current = request.user.username
+
+        if request.method == 'PUT':
+            if (groups == group or group_2) or (event.support_contact == username_current and sale_co.id == hr.id) \
+                    or (vendeur == hr.id):
+                if str(event.event_statu) != 'End' or groups == group_2:
+                    event.note = request.data['note']
+                    event.event_date = request.data['event_date']
+                    event.attendees = request.data['attendees']
+                    event.date_created = request.data['date_created']
+                    event.date_update = request.data['date_update']
+                    event.event_statu = get_object_or_404(EventStatus, id=request.data['event_statu'])
+                    event.client = get_object_or_404(Client, id=request.data['client'])
+                    event.support_contact = get_object_or_404(User, id=request.data['support_contact'])
+                    event.save()
+                    return Response(EventDetailSerializers(event).data, status.HTTP_200_OK)
+                else:
+                    return Response(status.HTTP_401_UNAUTHORIZED)
+            return Response(status.HTTP_401_UNAUTHORIZED)
 
 
-class EventStatusViewSet(APIView):
+class EventStatusViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
     """
+    serializer_class = EventStatusDetailSerializers
+    permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, *args, **kwargs):
+    def get_queryset(self):
         stat_event = EventStatus.objects.all()
-        serializer = EventStatusDetailSerializers(stat_event, many=True)
-        return Response(serializer.data)
+        return stat_event
