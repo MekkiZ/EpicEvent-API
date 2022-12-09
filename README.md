@@ -1,6 +1,44 @@
 # SoftDesk API
 ## Description
 This API handle the enterprise structures, with client and contrat for events
+## install and Create ddb Postgresql
+
+### linux:
+```angular2html
+sudo apt-get update
+sudo apt-get install python-pip python-dev libpq-dev postgresql postgresql-contrib
+```
+
+On macOS, you can install posgresql in the terminal with brew:
+```angular2html
+brew install postgresql
+```
+Now, you may start up postresql after its installation with the following command.
+```angular2html
+brew services start postgresql
+```
+```angular2html
+sudo su - postgres
+```
+```angular2html
+psql
+```
+```angular2html
+CREATE DATABASE mydb;
+```
+```angular2html
+CREATE USER myuser WITH PASSWORD 'password';
+```
+```angular2html
+GRANT ALL PRIVILEGES ON DATABASE mydb TO myuser;
+```
+```angular2html
+\q
+```
+```angular2html
+exit
+```
+
 ## Setup
 Create a virtualenv for the project with Python 3.10
 
