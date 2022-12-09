@@ -12,3 +12,5 @@ def create_event(request, Event, get_object_or_404, EventStatus, Client, User):
     )
     event.save()
     return event
+
+
