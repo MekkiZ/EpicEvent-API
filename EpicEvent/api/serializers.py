@@ -47,14 +47,14 @@ class ClientDetailSerializers(serializers.ModelSerializer):
                   'company_name',
                   'date_created',
                   'date_update',
-                  'sales_contact']
+                  ]
 
 
 class ContratDetailSerializers(serializers.ModelSerializer):
+
     class Meta:
         model = Contrat
         fields = ['id',
-                  'sales_contact',
                   'client',
                   'date_created',
                   'date_update',

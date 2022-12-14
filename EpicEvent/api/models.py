@@ -66,5 +66,3 @@ class Event(models.Model):
     attendees = models.IntegerField()
     event_date = models.DateTimeField()
     note = models.TextField()
-
-

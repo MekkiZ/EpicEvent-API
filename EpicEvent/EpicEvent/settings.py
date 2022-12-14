@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+import logging
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -96,6 +98,39 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend'
     ]
+}
+## log save
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+
+    'handlers': {
+
+        'mylog': {
+            'filename': os.path.join(BASE_DIR / 'log/error.log'),
+            'class': 'logging.handlers.RotatingFileHandler',
+            'encoding': 'utf8',
+            'formatter': 'verbose'
+        }
+    },
+    'loggers': {
+        'log': {
+            'handlers': ['mylog'],
+            'propagate': True,
+        },
+
+    }
 }
 
 # Password validation
