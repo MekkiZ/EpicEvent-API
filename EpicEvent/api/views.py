@@ -358,24 +358,38 @@ class EventViewSet(viewsets.ModelViewSet):
         group_2 = Group.objects.get(name='team_gestion').name
         event = Event.objects.all().values_list('client', flat=True)
         contrat = Contrat.objects.filter(Q(client__in=event) & Q(status=False)).values()
-        try:
-            for i in contrat:
-                list_sign.append(i['client_id'])
-            event_id = get_object_or_404(Client, id=self.request.data['client'])
-            if event_id.id in list_sign:
-                logger.info('The user has try to creat contract but the client has not signed it')
-                return Response(data={"You can't create event because this client have not sign the contract"},
-                                status=status.HTTP_406_NOT_ACCEPTABLE)
-            elif groups == (group or group_2):
-                logger.error(f'The user is from {group_2} or {group}')
-                event = create_event(self.request, Event, get_object_or_404, EventStatus, Client, User)
-                logger.info(f"One event has been created")
-                return Response(EventDetailSerializers(event).data)
-            else:
-                logger.error(f'The user has no rights for create some Events')
-                return Response(status=status.HTTP_401_UNAUTHORIZED)
-        except PermissionError as p:
-            logger.error(p)
+        print('je suis ici en premier')
+
+        for i in contrat:
+            list_sign.append(i['client_id'])
+        event_id = get_object_or_404(Client, id=self.request.data['client'])
+
+        if event_id.id in list_sign:
+            print('je suis ici')
+            logger.info('The user has try to creat contract but the client has not signed it')
+            return Response(data={"You can't create event because this client have not sign the contract"},
+                            status=status.HTTP_406_NOT_ACCEPTABLE)
+        elif groups == group or group_2:
+
+            print('je suis ici elif')
+            logger.error(f'The user is from {group_2} or {group}')
+            event = Event.objects.create(
+                note=self.request.data['note'],
+                event_date=self.request.data['event_date'],
+                attendees=self.request.data['attendees'],
+                date_created=self.request.data['date_created'],
+                date_update=self.request.data['date_update'],
+                event_statu=get_object_or_404(EventStatus, id=self.request.data['event_statu']),
+                client=get_object_or_404(Client, id=self.request.data['client']),
+                support_contact=get_object_or_404(User, id=hr.id),
+            )
+            event.save()
+            logger.info(f"One event has been created")
+            return Response(EventDetailSerializers(event).data)
+        else:
+            logger.error(f'The user has no rights for create some Events')
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
 
     def update(self, request, pk, *args, **kwargs):
         hr = User.objects.get(id=request.user.id)
