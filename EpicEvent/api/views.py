@@ -84,26 +84,29 @@ class ClientFilterViewSet(viewsets.ModelViewSet):
     filterset_fields = ['last_name', 'email']
 
     def get_queryset(self):
-        hr = User.objects.get(id=self.request.user.id)
+        user_for_client = User.objects.get(id=self.request.user.id)
         # id_group_from_user = hr.groups.all().values_list('id', flat=True)[0]
-        groups = hr.groups.all().values_list('name', flat=True)[0]
+        groups =  user_for_client.groups.all().values_list('name', flat=True)[0]
         group = Group.objects.get(name='team_sales').name
         group_2 = Group.objects.get(name='team_gestion').name
         if groups == group:
-            return Client.objects.filter(sales_contact=hr.id)
+            return Client.objects.filter(sales_contact= user_for_client.id)
         elif groups == group_2:
             return Client.objects.all()
         else:
             raise NotFound
 
     def create(self, *args, **kwargs):
-        hr = User.objects.get(id=self.request.user.id)
+        user_for_client = User.objects.get(id=self.request.user.id)
+        print(user_for_client)
         # id_group_from_user = hr.groups.all().values_list('id', flat=True)[0]
-        groups = hr.groups.all().values_list('name', flat=True)[0]
-        group = Group.objects.get(name='team_sales').name
-        group_2 = Group.objects.get(name='team_gestion').name
+        groups = user_for_client.groups.all().values_list('id', flat=True)[0]
+        print(groups)
+        group = Group.objects.get(name='team_sales').id
+        group_2 = Group.objects.get(name='team_gestion').id
 
         if groups == group or group_2:
+            print('je suiis ici')
             client = Client.objects.create(
                 first_name=self.request.data['first_name'],
                 last_name=self.request.data['last_name'],
