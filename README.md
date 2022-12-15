@@ -30,7 +30,7 @@ CREATE DATABASE epicevent;
 CREATE USER mek WITH PASSWORD 'password';
 ```
 ```angular2html
-GRANT ALL PRIVILEGES ON DATABASE mydb TO myuser;
+GRANT ALL PRIVILEGES ON DATABASE epicevent TO mek;
 ```
 ```angular2html
 \q
