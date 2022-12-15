@@ -168,3 +168,14 @@ ERROR 2022-12-14 23:55:32,266 views 3332 123145513558016 The user is from team_g
 ERROR 2022-12-14 23:55:32,286 views 3332 123145513558016 The user is from team_gestion
 ERROR 2022-12-15 10:52:03,750 views 4333 123145512898560 UserBenoit has no rights here 
 ERROR 2022-12-15 10:52:22,610 views 4333 123145512898560 UserBenoit has no rights here 
+ERROR 2022-12-15 10:53:19,891 views 4333 123145512898560 Usermarc has no rights here 
+ERROR 2022-12-15 10:55:12,918 views 4333 123145512898560 User has no rights here
+ERROR 2022-12-15 10:57:08,550 views 4333 123145512898560 The user is from team_gestion or team_sales
+ERROR 2022-12-15 10:57:40,539 views 4333 123145512898560 The user is from team_gestion or team_sales
+ERROR 2022-12-15 10:58:08,778 views 4333 123145512898560 The user is from team_gestion or team_sales
+ERROR 2022-12-15 10:59:27,483 views 4487 123145592381440 The user is from team_gestion or team_sales
+ERROR 2022-12-15 10:59:41,848 views 4499 123145543995392 The user is from team_gestion or team_sales
+ERROR 2022-12-15 11:00:15,226 views 4514 123145506705408 The user is from team_gestion or team_sales
+ERROR 2022-12-15 11:00:43,925 views 4514 123145506705408 The user is from team_gestion or team_sales
+ERROR 2022-12-15 11:01:58,257 views 4542 123145584087040 The user is from team_gestion or team_sales
+ERROR 2022-12-15 11:03:07,494 views 4542 123145584087040 The user is from team_gestion or team_sales

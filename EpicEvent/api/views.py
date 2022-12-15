@@ -384,7 +384,8 @@ class EventViewSet(viewsets.ModelViewSet):
                     client=get_object_or_404(Client, id=self.request.data['client']),
                     support_contact=get_object_or_404(User, id=hr.id),
                 )
-                if contrat_bis.status == 'true':
+                print(contrat_bis.status)
+                if contrat_bis.status is True:
                     event.save()
                     logger.info(f"One event has been created")
                     return Response(EventDetailSerializers(event).data)
