@@ -14,7 +14,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as filters
 from api.permissions import IsAdminAuthenticated, ReadOnly
-from .function_native import create_event
+
 import logging
 
 logger = logging.getLogger('log')
@@ -331,16 +331,16 @@ class EventViewSet(viewsets.ModelViewSet):
         group_3 = Group.objects.get(name='team_support').name
         try:
             if groups == group_3:
-                logger.error(f'The user is from {group_3}')
+                logger.info(f'The user is from {group_3}')
                 return Event.objects.filter(support_contact=hr.id)
             elif groups == group:
-                logger.error(f'The user is from {group}')
+                logger.info(f'The user is from {group}')
                 client = Client.objects.filter(sales_contact=hr.id)
                 event = Event.objects.filter(client__in=client)
                 return event
                 # return  Event.objects.all()
             elif groups == group_2:
-                logger.error(f'The user is from {group_2}')
+                logger.info(f'The user is from {group_2}')
                 return Event.objects.all()
             else:
                 logger.error(f'User has no rights here for this queryset')
