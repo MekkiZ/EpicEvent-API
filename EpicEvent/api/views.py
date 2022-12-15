@@ -147,7 +147,8 @@ class ClientFilterViewSet(viewsets.ModelViewSet):
         group_2 = Group.objects.get(name='team_gestion').id
         try:
 
-            if groups == (group or group_2):
+            if (groups == group) or (groups == group_2):
+                print('je suis ici')
                 logger.info(f"One user of {group} ou {group_2} is here")
                 client = Client.objects.create(
                     first_name=self.request.data['first_name'],
@@ -252,7 +253,7 @@ class ContratViewSet(viewsets.ModelViewSet):
         group = Group.objects.get(name='team_sales').name
         group_2 = Group.objects.get(name='team_gestion').name
         try:
-            if groups == (group or group_2):
+            if (groups == group) or (groups == group_2):
                 logger.info(f"User from {group} or {group_2} was here ")
                 contrat = Contrat.objects.create(
                     payment_due=self.request.data['payment_due'],
@@ -382,7 +383,7 @@ class EventViewSet(viewsets.ModelViewSet):
             return Response(data={"You can't create event because this client have not sign the contract"},
                             status=status.HTTP_406_NOT_ACCEPTABLE)
         else:'''
-        if groups == group or group_2:
+        if (groups == group) or (groups == group_2):
             logger.error(f'The user is from {group_2} or {group}')
             event = Event.objects.create(
                 note=self.request.data['note'],
