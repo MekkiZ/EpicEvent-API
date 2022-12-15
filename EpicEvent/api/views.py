@@ -382,7 +382,7 @@ class EventViewSet(viewsets.ModelViewSet):
                     date_update=self.request.data['date_update'],
                     event_statu=get_object_or_404(EventStatus, id=self.request.data['event_statu']),
                     client=get_object_or_404(Client, id=self.request.data['client']),
-                    support_contact=get_object_or_404(User, id=hr.id),
+                    support_contact=get_object_or_404(User, self.request.data['date_update']),
                 )
                 print(contrat_bis.status)
                 if contrat_bis.status is True:
