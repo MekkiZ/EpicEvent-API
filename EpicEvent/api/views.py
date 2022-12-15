@@ -242,7 +242,7 @@ class ContratViewSet(viewsets.ModelViewSet):
         group = Group.objects.get(name='team_sales').name
         group_2 = Group.objects.get(name='team_gestion').name
         try:
-            if groups == group or group_2:
+            if groups == (group or group_2):
                 logger.info(f"User from {group} or {group_2} was here ")
                 contrat = Contrat.objects.create(
                     payment_due=self.request.data['payment_due'],
