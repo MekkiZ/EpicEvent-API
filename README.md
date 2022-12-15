@@ -33,15 +33,11 @@ CREATE USER mek WITH PASSWORD 'password';
 GRANT ALL PRIVILEGES ON DATABASE epicevent TO mek;
 ```
 ```angular2html
-INSERT INTO auth_group (id, name) VALUES (1, 'team_gestion'), (2, 'team_sales'), (3, 'team_support')
-```
-```angular2html
 \q
 ```
 ```angular2html
 exit
 ```
-INSERT INTO auth_group (id, name) VALUES (1, 'team_gestion'), (2, 'team_sales'), (3, 'team_support')
 
 ## Setup
 Create a virtualenv for the project with Python 3.10
@@ -52,13 +48,14 @@ python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
+
+
 # Run the script
 
 Run this command :
 ```
 cd softdesk
 ```
-And  :
 ```
 python3 manage.py runserver
 ```
@@ -74,6 +71,7 @@ Quit the server with CONTROL-C.
 ```
 Copy this link on your favorite browser :
 http://127.0.0.1:8080/
+
 
 
 After enjoy
