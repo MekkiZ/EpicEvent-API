@@ -17,11 +17,8 @@ Now, you may start up postresql after its installation with the following comman
 ```angular2html
 brew services start postgresql
 ```
-```angular2html
-sudo su - postgres
 ```
-```angular2html
-psql
+psql postgres
 ```
 ```angular2html
 CREATE DATABASE epicevent;
