@@ -24,10 +24,10 @@ sudo su - postgres
 psql
 ```
 ```angular2html
-CREATE DATABASE mydb;
+CREATE DATABASE epicevent;
 ```
 ```angular2html
-CREATE USER myuser WITH PASSWORD 'password';
+CREATE USER mek WITH PASSWORD 'password';
 ```
 ```angular2html
 GRANT ALL PRIVILEGES ON DATABASE mydb TO myuser;
