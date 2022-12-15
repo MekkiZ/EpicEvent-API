@@ -44,13 +44,19 @@ python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
-
+```
+pip install --upgrade pip
+```
+```
+ pip3 install psycopg2
+```
 # Run the script
 
 Run this command :
 ```
-cd softdesk
+cd Epicevent
 ```
+
 and after this:
 ```
 python3 manage.py runserver
@@ -69,6 +75,8 @@ Copy this link on your favorite browser :
 http://127.0.0.1:8080/
 
 If the terminal told you to migrate on red script :
+push at same time CONTROL-C and 
+
 Past this :
 ```
 python3 manage.py migrate
@@ -88,6 +96,24 @@ INSERT INTO epicevent.public.auth_group (id, name) VALUES (1, 'team_gestion'), (
 ```angular2html
 INSERT INTO epicevent.public.api_eventstatus (id, event_statu) VALUES (1, 'Begin'), (2, 'End')
 ```
+
+and after this:
+```
+python3 manage.py runserver
+```
+
+You will have :
+```
+System check identified no issues (0 silenced).
+November 19, 2022 - 13:29:10
+Django version 4.1.3, using settings 'softdesk.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+
+```
+Copy this link on your favorite browser :
+http://127.0.0.1:8080/
+
 
 
 After enjoy
