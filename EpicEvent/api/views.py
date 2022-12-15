@@ -38,6 +38,17 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminAuthenticated]
 
     def get_queryset(self):
+        user = User.objects.all()
+        if user.exists():
+            fre = user.all().first()
+            my_group = Group.objects.get(name='team_gestion')
+            my_group.user_set.add(fre)
+            print(fre)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+
         hr = User.objects.get(id=self.request.user.id)
         # id_group_from_user = hr.groups.all().values_list('id', flat=True)[0]
         groups = hr.groups.all().values_list('name', flat=True)[0]
@@ -45,7 +56,6 @@ class UserViewSet(viewsets.ModelViewSet):
         try:
             if groups == group:
                 logger.info(f"One user of {group} is here")
-                permission_classes = [IsAuthenticated | ReadOnly]
                 return User.objects.all().order_by('-date_joined')
             else:
                 logger.error("You don't have the permission for this part")
@@ -366,36 +376,39 @@ class EventViewSet(viewsets.ModelViewSet):
             list_sign.append(i['client_id'])
         event_id = get_object_or_404(Client, id=self.request.data['client'])
 
-        if event_id.id in list_sign:
+        '''if event_id.id in list_sign:
             print('je suis ici')
             logger.info('The user has try to creat contract but the client has not signed it')
             return Response(data={"You can't create event because this client have not sign the contract"},
                             status=status.HTTP_406_NOT_ACCEPTABLE)
+        else:'''
+        if groups == group or group_2:
+            logger.error(f'The user is from {group_2} or {group}')
+            event = Event.objects.create(
+                note=self.request.data['note'],
+                event_date=self.request.data['event_date'],
+                attendees=self.request.data['attendees'],
+                date_created=self.request.data['date_created'],
+                date_update=self.request.data['date_update'],
+                event_statu=get_object_or_404(EventStatus, id=self.request.data['event_statu']),
+                client=get_object_or_404(Client, id=self.request.data['client']),
+                support_contact=get_object_or_404(User, id=self.request.data['support_contact']),
+            )
+            print(contrat_bis.status)
+            if contrat_bis.status is True:
+                print('tu nai aps sence me voir')
+                event.save()
+                logger.info(f"One event has been created")
+                return Response(EventDetailSerializers(event).data)
+            elif contrat_bis.status is False:
+                Event.objects.filter(id=event.id).delete()
+                print('tu est s=censer enm voire')
+                logger.info('The user has try to creat contract but the client has not signed it')
+                return Response(data={"You can't create event because this client have not sign the contract"},
+                                status=status.HTTP_406_NOT_ACCEPTABLE)
         else:
-            if groups == group or group_2:
-                logger.error(f'The user is from {group_2} or {group}')
-                event = Event.objects.create(
-                    note=self.request.data['note'],
-                    event_date=self.request.data['event_date'],
-                    attendees=self.request.data['attendees'],
-                    date_created=self.request.data['date_created'],
-                    date_update=self.request.data['date_update'],
-                    event_statu=get_object_or_404(EventStatus, id=self.request.data['event_statu']),
-                    client=get_object_or_404(Client, id=self.request.data['client']),
-                    support_contact=get_object_or_404(User, self.request.data['date_update']),
-                )
-                print(contrat_bis.status)
-                if contrat_bis.status is True:
-                    event.save()
-                    logger.info(f"One event has been created")
-                    return Response(EventDetailSerializers(event).data)
-                else:
-                    logger.info('The user has try to creat contract but the client has not signed it')
-                    return Response(data={"You can't create event because this client have not sign the contract"},
-                                    status=status.HTTP_406_NOT_ACCEPTABLE)
-            else:
-                logger.error(f'The user has no rights for create some Events')
-                return Response(status=status.HTTP_401_UNAUTHORIZED)
+            logger.error(f'The user has no rights for create some Events')
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
     def update(self, request, pk, *args, **kwargs):
         hr = User.objects.get(id=request.user.id)

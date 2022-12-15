@@ -33,11 +33,15 @@ CREATE USER mek WITH PASSWORD 'password';
 GRANT ALL PRIVILEGES ON DATABASE epicevent TO mek;
 ```
 ```angular2html
+INSERT INTO auth_group (id, name) VALUES (1, 'team_gestion'), (2, 'team_sales'), (3, 'team_support')
+```
+```angular2html
 \q
 ```
 ```angular2html
 exit
 ```
+INSERT INTO auth_group (id, name) VALUES (1, 'team_gestion'), (2, 'team_sales'), (3, 'team_support')
 
 ## Setup
 Create a virtualenv for the project with Python 3.10
