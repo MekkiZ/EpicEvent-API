@@ -48,7 +48,14 @@ python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
-
+After that open postgresql :
+```
+psql postgres
+```
+copy that :
+```
+INSERT INTO auth_group (id, name) VALUES (1, 'team_gestion'), (2, 'team_sales'), (3, 'team_support')
+```
 
 # Run the script
 
@@ -56,6 +63,7 @@ Run this command :
 ```
 cd softdesk
 ```
+and after this:
 ```
 python3 manage.py runserver
 ```
