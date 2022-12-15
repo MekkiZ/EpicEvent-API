@@ -24,7 +24,7 @@ psql postgres
 CREATE DATABASE epicevent;
 ```
 ```angular2html
-CREATE USER mek WITH PASSWORD 'password';
+CREATE USER mek WITH PASSWORD 'mekki';
 ```
 ```angular2html
 GRANT ALL PRIVILEGES ON DATABASE epicevent TO mek;
@@ -32,26 +32,17 @@ GRANT ALL PRIVILEGES ON DATABASE epicevent TO mek;
 ```angular2html
 \q
 ```
-```angular2html
-exit
-```
-
 ## Setup
 Create a virtualenv for the project with Python 3.10
 
-Copie the Git-Link and after  
+Copie the Git-Link and after (git clone ' git link project ' )
+
+After on directory projet12:
+
 ```
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-```
-After that open postgresql :
-```
-psql postgres
-```
-copy that :
-```
-INSERT INTO auth_group (id, name) VALUES (1, 'team_gestion'), (2, 'team_sales'), (3, 'team_support')
 ```
 
 # Run the script
@@ -77,6 +68,26 @@ Quit the server with CONTROL-C.
 Copy this link on your favorite browser :
 http://127.0.0.1:8080/
 
+If the terminal told you to migrate on red script :
+Past this :
+```
+python3 manage.py migrate
+```
+
+after that open postgresql :
+```
+psql postgres
+```
+copy that :
+```angular2html
+\connect epicevent
+```
+```angular2html
+INSERT INTO epicevent.public.auth_group (id, name) VALUES (1, 'team_gestion'), (2, 'team_sales'), (3, 'team_support')
+```
+```angular2html
+INSERT INTO epicevent.public.api_eventstatus (id, event_statu) VALUES (1, 'Begin'), (2, 'End')
+```
 
 
 After enjoy
