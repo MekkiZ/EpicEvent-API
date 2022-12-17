@@ -56,6 +56,13 @@ Run this command :
 ```
 cd Epicevent
 ```
+And now you have to create SuperUSer, a manager of API;
+
+```
+python3 manage.py createsuperuser
+```
+###please Be carful, remember your username and password
+
 
 and after this:
 ```
