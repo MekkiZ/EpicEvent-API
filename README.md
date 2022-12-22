@@ -64,7 +64,7 @@ And now you have to create SuperUSer, a manager for API;
 ```
 python3 manage.py createsuperuser
 ```
-###please Be carful, remember your username and password
+**please Be carful, remember your username and password**
 
 and after this:
 ```
