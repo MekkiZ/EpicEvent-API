@@ -56,11 +56,21 @@ Run this command :
 ```
 cd Epicevent
 ```
+```
+python3 manage.py migrate
+```
 
 and after this:
 ```
 python3 manage.py runserver
 ```
+
+And now you have to create SuperUSer, a manager for API;
+```
+python3 manage.py createsuperuser
+```
+###please Be carful, remember your username and password
+
 
 You will have :
 ```
@@ -76,18 +86,6 @@ http://127.0.0.1:8080/
 
 If the terminal told you to migrate on red script :
 push at same time CONTROL-C and 
-
-Past this :
-```
-python3 manage.py migrate
-```
-And now you have to create SuperUSer, a manager of API;
-
-```
-python3 manage.py createsuperuser
-```
-###please Be carful, remember your username and password
-
 
 after that open postgresql :
 ```
